@@ -25,15 +25,23 @@ angular.module('starter', ['ionic'])
 
 .controller('con', function($scope,$ionicPopup, $timeout) {
     //$scope.cost = 123;
-    $scope.firstName = "John",
-    $scope.lastName = "Doe"
-    $scope.myVar = false;
+    //$scope.firstName = "John",
+    //$scope.lastName = "Doe"
+    
+
+    //定义serveruuid和characteristicuuid
+    $scope.service_uuid = "FFE0";
+    $scope.characteristic_uuid = "FFE1";
+    $scope.device_id = "";
+    $scope.hideBlueDevice = false;
+
     $scope.toggle = function() {
         $scope.myVar = !$scope.myVar;
     };
 
+    //定义搜索展现设备
     $scope.scan = function() {
-        //$scope.alertShow("12345");
+        //$scope.alertShow($scope.characteristic_uuid);
         deviceList.innerHTML = '';
         ble.startScan([], 
         function(device) { 
@@ -50,6 +58,7 @@ angular.module('starter', ['ionic'])
         
     };
 
+    //定义弹出alter窗口
     $scope.alertShow = function(massage) {
       var alertPopup = $ionicPopup.alert({
             title: 'device',
@@ -57,25 +66,48 @@ angular.module('starter', ['ionic'])
       });
     }
 
+    //定义按下抬起，发送指令方法
+    $scope.onSend = function(massage) {
+      //$scope.alertShow("device_id:"+$scope.device_id);
+      $scope.write($scope.device_id,massage);
+      
+    }
+
+
     //展现蓝牙设备
     $scope.onDiscoverDevice = function(device) {
       var listItem = document.createElement('div');
-          html = '<b>' + device.name + '</b><br/>' +
+          /*html = '<b>' + device.name + '</b><br/>' +
               'RSSI: ' + device.rssi + '&nbsp;|&nbsp;' +
-              device.id;
+              device.id;*/
+      html = '<b>' + device.name + '</b><br/>';
+      $scope.device_id = device.id;
+
+
+
 
       listItem.dataset.deviceId = device.id;
       listItem.setAttribute("id",device.id);
-      //$scope.alertShow(listItem.getAttribute("id"));
-      //listItem.setAttribute("ng-click","connect(this.id)");
       listItem.innerHTML = html;
       deviceList.appendChild(listItem);
-
+      
       //绑定监听点击时候链接
       listItem.addEventListener("click", function(){
         $scope.connect(this.id);
       });
-      
+
+
+      //添加连接按钮
+      connect = document.createElement('button');
+      connect.innerHTML = "connect"
+      deviceList.appendChild(connect);
+      connect.addEventListener("click", function(){
+        $scope.connect($scope.device_id);
+        //连接后隐藏
+        $scope.hideBlueDevice = true;
+      });
+
+      /*
       //定义发送按钮
       sendButtenUp = document.createElement('button');
       sendButtenUp.innerHTML = "up";
@@ -103,7 +135,7 @@ angular.module('starter', ['ionic'])
       deviceList.appendChild(sendButtenRight);
       sendButtenRight.addEventListener("click", function(){
         $scope.write(device.id,"0x04");
-      });
+      });*/
 
     }
 
@@ -112,16 +144,42 @@ angular.module('starter', ['ionic'])
       //$scope.alertShow("start connecting");
       
       ble.connect(deviceId, 
-        function() {$scope.alertShow("connected!");}, 
+        function() {
+          $scope.alertShow("connected!");
+          $scope.isConnected();
+        }, 
         function() {$scope.alertShow("connect fail!");});
     }
 
     $scope.write = function(deviceId,sdata) {
-      $scope.alertShow(deviceId+'|'+sdata);
+      //$scope.alertShow(deviceId+'|'+sdata);
       var data = new Uint8Array(1);
       data[0] = sdata;
-      ble.write(deviceId, "FFE0", "FFE1", data.buffer, 
-        function() {$scope.alertShow("send success!");}, 
-        function() {$scope.alertShow("send fail!");});
+      ble.write(deviceId, $scope.service_uuid, $scope.characteristic_uuid, data.buffer, 
+        function() {
+          //$scope.alertShow("send success!");
+        }, 
+        function() {
+          $scope.alertShow("send fail!");
+        }
+      );
     }
+
+    //判断是否连接
+    $scope.isConnected = function(){
+      ble.isConnected($scope.device_id,
+        function() {
+            $scope.status("green");
+        },
+        function() {
+            $scope.status("red");
+            $scope.connect($scope.device_id);
+        }
+      );
+    }
+    
+    $scope.status = function(status){
+      scan.style.color = status;
+    }
+
 });
