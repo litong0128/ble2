@@ -28,16 +28,84 @@ angular.module('starter', ['ionic'])
     //$scope.firstName = "John",
     //$scope.lastName = "Doe"
     
+    //定义方向变量 速度 前进后退 左右转向 复位 
+    $scope.go = "0x01";
+    $scope.back = "0x02";
+    $scope.left = "0x03";
+    $scope.right= "0x04";
+
+    $scope.speed_1 = "0x11";
+    $scope.speed_2 = "0x12";
+    $scope.speed_3 = "0x13";
+
+    $scope.reset_gb = "0xAA";
+    $scope.reset_lr = "0xBB";
 
     //定义serveruuid和characteristicuuid
     $scope.service_uuid = "FFE0";
     $scope.characteristic_uuid = "FFE1";
     $scope.device_id = "";
     $scope.hideBlueDevice = false;
+    //使用touchstart达到同时点击屏幕两个按钮，当点击前进时候可以点击方向控制左右
+    document.getElementById('b_f').addEventListener('touchstart',function(e){
+      $scope.onSend($scope.go);
+    });
+    document.getElementById('b_f').addEventListener('touchend',function(e){
+      $scope.onSend($scope.reset_gb);
+    });
+
+    document.getElementById('b_b').addEventListener('touchstart',function(e){
+      $scope.onSend($scope.back);
+    });
+    document.getElementById('b_b').addEventListener('touchend',function(e){
+      $scope.onSend($scope.reset_gb);
+    });
+
+    document.getElementById('b_l').addEventListener('touchstart',function(e){
+      $scope.onSend($scope.left);
+    });
+    document.getElementById('b_l').addEventListener('touchend',function(e){
+      $scope.onSend($scope.reset_lr);
+    });
+
+    document.getElementById('b_r').addEventListener('touchstart',function(e){
+      $scope.onSend($scope.right);
+    });
+    document.getElementById('b_r').addEventListener('touchend',function(e){
+      $scope.onSend($scope.reset_lr);
+    });
+
+    document.getElementById('speed1').addEventListener('touchstart',function(e){
+      $scope.onSend($scope.speed_1);
+      $scope.speedOnclick('speed1');
+    });
+    document.getElementById('speed2').addEventListener('touchstart',function(e){
+      $scope.onSend($scope.speed_2);
+      $scope.speedOnclick('speed2');
+    });
+    document.getElementById('speed3').addEventListener('touchstart',function(e){
+      $scope.onSend($scope.speed_3);
+      $scope.speedOnclick('speed3');
+    });
+    
+
+    
 
     $scope.toggle = function() {
         $scope.myVar = !$scope.myVar;
     };
+
+    $scope.speedOnclick = function(id) {
+
+      var x = document.getElementsByClassName("speed");
+      var i;
+      for (i = 0; i < x.length; i++) {
+        x[i].style.color = "";
+      }
+
+      var y = document.getElementById(id)
+      y.style.color = "green";
+    }
 
     //定义搜索展现设备
     $scope.scan = function() {
